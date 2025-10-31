@@ -54,22 +54,6 @@
 		}
 	];
 
-	const comparison = {
-		traditional: {
-			title: 'React/Vue',
-			points: [
-				'Virtual DOM complexo',
-				'Gerenciamento de estado manual',
-				'Muita abstração',
-				'Bundle size maior'
-			]
-		},
-		svelte: {
-			title: 'Svelte',
-			points: ['Sem Virtual DOM', 'Reatividade automática', 'Código direto', 'Bundle otimizado']
-		}
-	};
-
 	const mvcArchitecture = [
 		{
 			name: 'Model',
@@ -90,12 +74,11 @@
 		},
 		{
 			name: 'Controller',
-			tech: 'SvelteKit Server Routes',
+			tech: 'SvelteKit remote functions',
 			responsibilities: [
-				'API endpoints (+server.ts)',
-				'Lógica de negócio',
-				'Middleware e validação',
-				'Comunicação Model-View'
+				'Ponte entre model e view',
+				'Recebe e processa requisições',
+				'Aplica regras de controle (autenticação, autorização, validação extra)'
 			],
 			color: '#ffd700'
 		}
@@ -115,68 +98,6 @@
 			url: '/diagramaER.png'
 		}
 	];
-
-	const codeExamples = {
-		model: `
-			export const professorT = pgTable('professor', {
-				cpf: text('cpf').notNull(),
-				id: serial('id').notNull().primaryKey(),
-				departamento: text('departamento').notNull(),
-				saldo: integer('saldo').default(1000).notNull(),
-				userId: text('user_id')
-					.references(() => user.id)
-			});
-			`,
-
-		controller: `// src/routes/api/coins/+server.ts (Controller)
-import { json } from '@sveltejs/kit';
-import { db } from '$lib/server/db';
-import { students } from '$lib/server/schema';
-import { eq, sql } from 'drizzle-orm';
-
-export async function POST({ request }) {
-  const { studentId, amount } = await request.json();
-  
-  // Atualiza moedas do estudante
-  await db.update(students)
-    .set({ coins: sql\`coins + \${amount}\` })
-    .where(eq(students.id, studentId));
-  
-  return json({ success: true });
-}`,
-
-		view: `<!-- src/lib/components/CoinBalance.svelte (View) -->
-<script lang="ts">
-  export let studentId: number;
-  
-  let coins = 0;
-  let loading = false;
-  
-  async function addCoins(amount: number) {
-    loading = true;
-    const response = await fetch('/api/coins', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId, amount })
-    });
-    
-    if (response.ok) {
-      coins += amount;
-    }
-    loading = false;
-  }
-<\/script>
-
-<div class="card">
-  <h3>Saldo: \${coins}</h3>
-  <button 
-    on:click={() => addCoins(10)} 
-    disabled={\${loading}}
-    class="btn btn-primary">
-    {\${loading} ? 'Processando...' : 'Adicionar 10'}
-  </button>
-</div>`
-	};
 </script>
 
 <Slide>
@@ -205,56 +126,105 @@ export async function POST({ request }) {
 		</div>
 	</div>
 </Slide>
-
-<Slide animate>
-	<div class="content-slide">
-		<h2 class="slide-heading">Sobre Svelte</h2>
-		<div class="feature-grid">
-			{#each svelteFeatures as feature}
-				<div class="feature-card">
-					<h3>{feature.title}</h3>
-					<p>{feature.description}</p>
-				</div>
-			{/each}
-		</div>
-		<div class="info-badge">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-				<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-			</svg>
-			<span>Svelte compila para JavaScript vanilla - sem framework no browser!</span>
-		</div>
-	</div>
-</Slide>
-
 <Slide>
-	<div class="content-slide">
-		<h2 class="slide-heading">Por que Svelte?</h2>
-		<div class="comparison-box">
-			<div class="comparison-item traditional">
-				<h3>{comparison.traditional.title}</h3>
-				<ul class="styled-list">
-					{#each comparison.traditional.points as point}
-						<li>{point}</li>
-					{/each}
-				</ul>
+	<Slide animate>
+		<div class="content-slide">
+			<div class="svelte-header">
+				<img
+					src="https://raw.githubusercontent.com/sveltejs/branding/master/svelte-logo.svg"
+					alt="Svelte"
+					class="svelte-logo-header"
+				/>
+				<h2 class="slide-heading">Sobre Svelte</h2>
 			</div>
-			<div class="vs-divider">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-					<line x1="5" y1="12" x2="19" y2="12"></line>
-					<polyline points="12 5 19 12 12 19"></polyline>
+			<div class="feature-grid">
+				{#each svelteFeatures as feature}
+					<div class="feature-card">
+						<h3>{feature.title}</h3>
+						<p>{feature.description}</p>
+					</div>
+				{/each}
+			</div>
+			<div class="info-badge">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
 				</svg>
-			</div>
-			<div class="comparison-item svelte">
-				<h3>{comparison.svelte.title}</h3>
-				<ul class="styled-list">
-					{#each comparison.svelte.points as point}
-						<li>{point}</li>
-					{/each}
-				</ul>
+				<span>Svelte compila para JavaScript vanilla</span>
 			</div>
 		</div>
-	</div>
+	</Slide>
+	<Slide>
+		<div class="content-slide">
+			<h2 class="slide-heading">Svelte vs React</h2>
+			<div class="bundle-comparison">
+				<div class="bundle-card svelte-card">
+					<div class="framework-name">
+						<img
+							src="https://raw.githubusercontent.com/sveltejs/branding/master/svelte-logo.svg"
+							alt="Svelte"
+							class="comparison-logo"
+						/>
+						<h3>Svelte</h3>
+					</div>
+					<div class="bundle-size">
+						<span class="size-number">1.6</span>
+						<span class="size-unit">KB</span>
+					</div>
+					<p class="size-label">Bundle mínimo (gzip)</p>
+					<ul class="comparison-features">
+						<li>✓ Código compilado</li>
+						<li>✓ Reatividade nativa</li>
+						<li>✓ Parecido com simples JS</li>
+						<li>✓ Menor curva de aprendizado</li>
+					</ul>
+				</div>
+
+				<div class="bundle-card react-card">
+					<div class="framework-name">
+						<svg viewBox="0 0 24 24" fill="#61DAFB" class="comparison-logo">
+							<circle cx="12" cy="12" r="2"></circle>
+							<ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#61DAFB" stroke-width="1"
+							></ellipse>
+							<ellipse
+								cx="12"
+								cy="12"
+								rx="10"
+								ry="4"
+								fill="none"
+								stroke="#61DAFB"
+								stroke-width="1"
+								transform="rotate(60 12 12)"
+							></ellipse>
+							<ellipse
+								cx="12"
+								cy="12"
+								rx="10"
+								ry="4"
+								fill="none"
+								stroke="#61DAFB"
+								stroke-width="1"
+								transform="rotate(120 12 12)"
+							></ellipse>
+						</svg>
+						<h3>React + ReactDOM</h3>
+					</div>
+					<div class="bundle-size">
+						<span class="size-number">34.8</span>
+						<span class="size-unit">KB</span>
+					</div>
+					<p class="size-label">Bundle mínimo (gzip)</p>
+					<ul class="comparison-features">
+						<li>• Runtime necessário</li>
+						<li>• Hooks para reatividade</li>
+						<li>• Maior overhead</li>
+						<li>• JSX como sintaxe</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</Slide>
 </Slide>
+
 <Slide>
 	<Slide>
 		<div class="content-slide">
@@ -297,9 +267,9 @@ export async function POST({ request }) {
 		</Slide>
 	{/each}
 	<Slide animate>
-			<h2 class="slide-heading">Exemplo: Model</h2>
-			<Code id="code-model" lines="1-8|10-14">
-				{`
+		<h2 class="slide-heading">Exemplo: Model</h2>
+		<Code id="code-model" lines="1-8|10-14">
+			{`
 				export const professorT = pgTable('professor', {
 					cpf: text('cpf').notNull(),
 					id: serial('id').notNull().primaryKey(),
@@ -315,24 +285,24 @@ export async function POST({ request }) {
 					}
 				};
 				`}
-			</Code>
+		</Code>
 	</Slide>
 
 	<Slide>
-			<h2 class="slide-heading">Exemplo: Controller</h2>
-			<Code id="code-controller" lines={"1-3"}>
-				{`
+		<h2 class="slide-heading">Exemplo: Controller</h2>
+		<Code id="code-controller" lines={'1-3'}>
+			{`
 				export const listarProfessores = query(async () => {
 					return await professorModel.listar();
 				});
 				`}
-			</Code>
+		</Code>
 	</Slide>
 
 	<Slide animate>
-			<h2 class="slide-heading">Exemplo: View</h2>
-			<Code id="code-view" lines={"1-7|9-15"}>
-				{`
+		<h2 class="slide-heading">Exemplo: View</h2>
+		<Code id="code-view" lines={'1-7|9-15'}>
+			{`
 				<script>
 					let professores = $state([]);
 
@@ -349,7 +319,7 @@ export async function POST({ request }) {
 					</div>
 				{/each}
 				`}
-			</Code>
+		</Code>
 	</Slide>
 </Slide>
 
@@ -370,10 +340,10 @@ export async function POST({ request }) {
 	}
 
 	.coin-logo {
-		width: 120px;
-		height: 120px;
+		width: 80px;
+		height: 80px;
 		color: #ffd700;
-		margin-bottom: 2rem;
+		margin-bottom: 1.5rem;
 		animation: rotate 4s linear infinite;
 		filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.5));
 	}
@@ -393,7 +363,7 @@ export async function POST({ request }) {
 	}
 
 	.main-title {
-		font-size: 7rem;
+		font-size: 5rem;
 		font-weight: 900;
 		background: linear-gradient(135deg, #ffd700, #ffed4e, #ffd700);
 		-webkit-background-clip: text;
@@ -404,16 +374,16 @@ export async function POST({ request }) {
 	}
 
 	.subtitle {
-		font-size: 2rem;
+		font-size: 1.5rem;
 		color: #aaa;
-		margin: 1.5rem 0;
+		margin: 1rem 0;
 		font-weight: 300;
 	}
 
 	.tagline {
-		font-size: 1.3rem;
+		font-size: 1rem;
 		color: #999;
-		margin-top: 2rem;
+		margin-top: 1.5rem;
 		font-style: italic;
 	}
 
@@ -443,26 +413,48 @@ export async function POST({ request }) {
 	}
 
 	.slide-heading {
-		font-size: 3rem;
-		margin-bottom: 10px;
+		font-size: 2.2rem;
+		margin-bottom: 0.8rem;
 		color: #ffd700;
-		border-bottom: 4px solid #ffd700;
-		padding-bottom: 1rem;
+		border-bottom: 3px solid #ffd700;
+		padding-bottom: 0.8rem;
+	}
+
+	.svelte-header {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+	}
+
+	.svelte-logo-header {
+		width: 3.5rem;
+		height: 3.5rem;
+		object-fit: contain;
+		animation: float 3s ease-in-out infinite;
+	}
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-10px);
+		}
 	}
 
 	/* Feature Grid */
 	.feature-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 2rem;
-		margin-top: 1rem;
+		gap: 1.5rem;
 	}
 
 	.feature-card {
 		background: rgba(255, 255, 255, 0.05);
 		border: 2px solid rgba(255, 215, 0, 0.3);
 		border-radius: 16px;
-		padding: 2rem;
+		padding: 1.5rem;
 		text-align: center;
 		transition: all 0.3s ease;
 	}
@@ -474,20 +466,20 @@ export async function POST({ request }) {
 	}
 
 	.feature-icon {
-		width: 4rem;
-		height: 4rem;
-		margin: 0 auto 1rem;
+		width: 3rem;
+		height: 3rem;
+		margin: 0 auto 0.8rem;
 		color: #ffd700;
 	}
 
 	.feature-card h3 {
-		font-size: 1.8rem;
-		margin: 1rem 0;
+		font-size: 1.4rem;
+		margin: 0.8rem 0;
 		color: #ffd700;
 	}
 
 	.feature-card p {
-		font-size: 1.2rem;
+		font-size: 1rem;
 		color: #ccc;
 	}
 
@@ -530,9 +522,9 @@ export async function POST({ request }) {
 	}
 
 	.diagram-card h3 {
-		font-size: 1.3rem;
+		font-size: 1.1rem;
 		color: #ffd700;
-		margin: 1rem 1rem 0.5rem 1rem;
+		margin: 0.8rem 0.8rem 0.4rem 0.8rem;
 	}
 
 	/* Individual Diagram Slides */
@@ -591,19 +583,19 @@ export async function POST({ request }) {
 	}
 
 	.tech-logo {
-		width: 2.5rem;
-		height: 2.5rem;
+		width: 2rem;
+		height: 2rem;
 		object-fit: contain;
 	}
 
 	.tech-logo-svg {
-		width: 2.5rem;
-		height: 2.5rem;
+		width: 2rem;
+		height: 2rem;
 		color: #ffd700;
 	}
 
 	.tech-name {
-		font-size: 1.5rem;
+		font-size: 1.2rem;
 		font-weight: 600;
 		color: #fff;
 	}
@@ -658,27 +650,28 @@ export async function POST({ request }) {
 	}
 
 	.mvc-box h3 {
-		font-size: 2rem;
-		margin: 1rem 0;
+		font-size: 1.5rem;
+		margin: 0.8rem 0;
 		color: #ffd700;
 	}
 
 	.mvc-box p {
-		font-size: 1.2rem;
+		font-size: 1rem;
 		color: #aaa;
-		margin-bottom: 1rem;
+		margin-bottom: 0.8rem;
 	}
 
 	.mvc-list {
 		list-style: none;
 		padding: 0;
 		text-align: left;
+		margin: 0;
 	}
 
 	.mvc-list li {
-		padding: 0.5rem;
-		margin: 0.3rem 0;
-		font-size: 1.1rem;
+		padding: 0.4rem;
+		margin: 0.2rem 0;
+		font-size: 0.95rem;
 		color: #ccc;
 	}
 
@@ -783,21 +776,21 @@ export async function POST({ request }) {
 	.info-badge {
 		background: linear-gradient(135deg, #4ecdc4, #44a8a0);
 		color: white;
-		padding: 1.5rem;
+		padding: 1rem;
 		border-radius: 12px;
 		text-align: center;
-		font-size: 1.5rem;
+		font-size: 1.1rem;
 		font-weight: 600;
-		margin-top: 2rem;
+		margin-top: 1.5rem;
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.8rem;
 		justify-content: center;
 	}
 
 	.info-badge svg {
-		width: 2rem;
-		height: 2rem;
+		width: 1.5rem;
+		height: 1.5rem;
 		flex-shrink: 0;
 	}
 
@@ -1024,5 +1017,232 @@ export async function POST({ request }) {
 		color: #ffd700;
 		margin-top: 2rem;
 		font-weight: 600;
+	}
+
+	/* Demo Container */
+	.demo-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 70vh;
+		margin-top: 2rem;
+	}
+
+	.demo-button {
+		background: linear-gradient(135deg, #ffd700, #ffed4e);
+		color: #000;
+		border: none;
+		padding: 2rem 3rem;
+		border-radius: 20px;
+		font-size: 2rem;
+		font-weight: 700;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		transition: all 0.3s ease;
+		box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+	}
+
+	.demo-button:hover {
+		transform: translateY(-5px) scale(1.05);
+		box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
+	}
+
+	.demo-button svg {
+		width: 3rem;
+		height: 3rem;
+	}
+
+	.iframe-container {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		border-radius: 12px;
+		overflow: hidden;
+		border: 3px solid #ffd700;
+		box-shadow: 0 10px 40px rgba(255, 215, 0, 0.3);
+	}
+
+	.close-button {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		z-index: 10;
+		background: rgba(255, 0, 0, 0.8);
+		color: white;
+		border: none;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+	}
+
+	.close-button:hover {
+		background: rgba(255, 0, 0, 1);
+		transform: scale(1.1);
+	}
+
+	.close-button svg {
+		width: 20px;
+		height: 20px;
+	}
+
+	.demo-iframe {
+		width: 100%;
+		height: 100%;
+		border: none;
+		background: white;
+	}
+
+	/* Bundle Comparison */
+	.bundle-comparison {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 2rem;
+		margin-top: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.bundle-card {
+		background: rgba(255, 255, 255, 0.05);
+		border-radius: 20px;
+		padding: 1.2rem;
+		text-align: center;
+		transition: all 0.3s ease;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	.svelte-card {
+		border: 3px solid #ff3e00;
+		box-shadow: 0 5px 20px rgba(255, 62, 0, 0.2);
+	}
+
+	.svelte-card:hover {
+		transform: translateY(-10px);
+		box-shadow: 0 15px 40px rgba(255, 62, 0, 0.4);
+	}
+
+	.react-card {
+		border: 3px solid #61dafb;
+		box-shadow: 0 5px 20px rgba(97, 218, 251, 0.2);
+	}
+
+	.react-card:hover {
+		transform: translateY(-10px);
+		box-shadow: 0 15px 40px rgba(97, 218, 251, 0.4);
+	}
+
+	.framework-name {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		margin-bottom: 1.2rem;
+	}
+
+	.comparison-logo {
+		width: 2.5rem;
+		height: 2.5rem;
+	}
+
+	.framework-name h3 {
+		font-size: 1.4rem;
+		color: #ffd700;
+		margin: 0;
+	}
+
+	.bundle-size {
+		margin: 0;
+	}
+
+	.size-number {
+		font-size: 3.5rem;
+		font-weight: 900;
+		background: linear-gradient(135deg, #ffd700, #ffed4e);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+
+	.size-unit {
+		font-size: 1.5rem;
+		color: #aaa;
+		margin-left: 0.3rem;
+	}
+
+	.size-label {
+		font-size: 1rem;
+		color: #999;
+		margin-bottom: 1.2rem;
+	}
+
+	.comparison-features {
+		list-style: none;
+		padding: 0;
+		text-align: left;
+		width: 100%;
+		margin: 0;
+	}
+
+	.comparison-features li {
+		padding: 0.5rem 0.8rem;
+		margin: 0.3rem 0;
+		font-size: 1rem;
+		color: #ddd;
+		background: rgba(255, 255, 255, 0.03);
+		border-radius: 8px;
+	}
+
+	.performance-metrics {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 1.5rem;
+		margin-top: 2rem;
+	}
+
+	.metric-item {
+		background: rgba(255, 215, 0, 0.08);
+		border: 2px solid rgba(255, 215, 0, 0.3);
+		border-radius: 16px;
+		padding: 1.5rem;
+		display: flex;
+		gap: 1rem;
+		align-items: flex-start;
+		transition: all 0.3s ease;
+	}
+
+	.metric-item:hover {
+		transform: translateY(-5px);
+		border-color: #ffd700;
+		background: rgba(255, 215, 0, 0.15);
+	}
+
+	.metric-icon {
+		font-size: 2.5rem;
+		flex-shrink: 0;
+	}
+
+	.metric-content h4 {
+		font-size: 1.3rem;
+		color: #ffd700;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.metric-content p {
+		font-size: 1.1rem;
+		color: #ccc;
+		margin: 0;
+		line-height: 1.5;
+	}
+
+	.metric-content strong {
+		color: #ffd700;
+		font-weight: 700;
 	}
 </style>
